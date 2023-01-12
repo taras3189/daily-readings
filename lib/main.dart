@@ -10,23 +10,30 @@ import 'home_screen.dart';
 import 'privacy_screen.dart';
 import 'stats_screen.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  FirebaseApp firebaseApp = await Firebase.initializeApp();
+  await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyBsPDQ3AS50XCATGsRkDO3kxy6Bp-UykRk',
+        appId: '1:731761563474:android:bf0d5319cafcecfd8c0c8b',
+        messagingSenderId: '731761563474',
+        projectId: 'daily-readings-63a7d',
+        storageBucket: 'daily-readings-63a7d.appspot.com',
+      ));
   runApp(const MyApp());
 }
 
 final ThemeData theme = ThemeData();
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Daily Readings',
       routes: {
-        '/home': (context) => const HomeScreen(),
+        HomeScreen.route: (context) => const HomeScreen(),
         '/bible': (context) => const BibleScreen(),
         '/stats': (context) => const StatsScreen(),
         '/goals': (context) => const GoalsScreen(),
@@ -41,8 +48,8 @@ class MyApp extends StatelessWidget {
           primary: const Color(0xff477bab),
         ),
       ),
+      initialRoute: HomeScreen.route,
       debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
     );
   }
 }
