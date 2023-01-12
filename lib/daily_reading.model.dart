@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 class DailyReading {
   String? author;
   String? date;
@@ -67,5 +68,10 @@ class DailyReading {
       return List<DailyReading>.from(list.map(DailyReading.fromJson));
     }
     return List<DailyReading>.empty();
+  }
+
+  @override
+  String toString() {
+    return 'DailyReading(author: $author, date: $date, description: $description, hymnsNumber: $hymnsNumber, nameOfHymnbook: $nameOfHymnbook, numberOfVerses: $numberOfVerses, prayer: $prayer, reference: $reference, referenceBook: $referenceBook, time: $time, title: $title, tuneName: $tuneName, id: $id)';
   }
 }
