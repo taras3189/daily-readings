@@ -6,9 +6,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'daily_reading.model.dart';
+
 enum Author { spurgeon, ryle }
 
 class HomeScreen extends StatefulWidget {
+  static String route = '/home';
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -17,9 +20,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Author? _author = Author.spurgeon;
-  String? _description;
 
-  final databaseReference = FirebaseDatabase.instance.reference();
+  final databaseReference = FirebaseDatabase.instance.ref();
   List<String> morningDescriptions = [];
   List<String> eveningDescriptions = [];
 
@@ -28,15 +30,16 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
 
     databaseReference.child('Description').onChildAdded.listen((event) {
-      final value = event.snapshot.value;
-      if (value['Time'] == 'morning') {
-        morningDescriptions.add(value['Description']);
-      } else {
-        eveningDescriptions.add(value['Description']);
+      final reading = event.snapshot.value as DailyReading?;
+      if (null != reading) {
+        if (reading.time == 'Morning') {
+          morningDescriptions.add(reading.description.toString());
+        } else {
+          eveningDescriptions.add(reading.description.toString());
+        }
       }
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.calendar_month_sharp)),
           ],
         ),
-        body: const Padding(
-          padding: EdgeInsets.all(18.0),
+        body: Padding(
+          padding: const EdgeInsets.all(18.0),
           child: TabBarView(
             children: [
               SingleChildScrollView(
@@ -100,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       return Text(
                         morningDescriptions[index],
-                        style: TextStyle(fontSize: 22),
+                        style: const TextStyle(fontSize: 22),
                       );
                     },
                   ),
@@ -117,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       return Text(
                         eveningDescriptions[index],
-                        style: TextStyle(fontSize: 22),
+                        style: const TextStyle(fontSize: 22),
                       );
                     },
                   ),
@@ -260,11 +263,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-Future<Map<String, dynamic>> _fetchJsonData() async {
-  final response = await http
-      .get('https://daily-readings-63a7d-default-rtdb.firebaseio.com');
+Future<List<DailyReading>?> _fetchJsonData() async {
+  Uri url =
+      Uri(path: 'https://daily-readings-63a7d-default-rtdb.firebaseio.com');
+  final response = await http.get(url);
   if (response.statusCode == 200) {
-    return json.decode(response.body);
+    dynamic data = json.decode(response.body);
+    return DailyReading.listFromJson((data));
   } else {
     throw Exception('Failed to load JSON data');
   }
@@ -275,8 +280,14 @@ Widget build(BuildContext context) {
   return FutureBuilder(
     future: _fetchJsonData(),
     builder: (context, snapshot) {
-      if (snapshot.hasData) {
-        return Text(snapshot.data['Description']);
+      if (snapshot.connectionState == ConnectionState.done) {
+        List<DailyReading>? readings = snapshot.data as List<DailyReading>?;
+        if (null != readings && readings.isNotEmpty) {
+          DailyReading firstReading = readings.first;
+          return Text(firstReading.description.toString());
+        } else {
+          return const SizedBox.shrink();
+        }
       } else if (snapshot.hasError) {
         return Text('Error: ${snapshot.error}');
       }

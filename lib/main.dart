@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Daily Readings',
       routes: {
-        '/home': (context) => const HomeScreen(),
+        HomeScreen.route: (context) => const HomeScreen(),
         '/bible': (context) => const BibleScreen(),
         '/stats': (context) => const StatsScreen(),
         '/goals': (context) => const GoalsScreen(),
@@ -48,8 +48,8 @@ class MyApp extends StatelessWidget {
           primary: const Color(0xff477bab),
         ),
       ),
+      initialRoute: HomeScreen.route,
       debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
     );
   }
 }
